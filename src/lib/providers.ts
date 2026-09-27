@@ -7,7 +7,8 @@ export type Provider = {
   badge: string;
   bonus: string;
   notes: string;
-  url: string;
+  url: string; // primary link (kept for compatibility)
+  urls: string[]; // all links, primary first
   status: Status;
 };
 
@@ -20,13 +21,28 @@ export const CATEGORIES = [
 ];
 
 export const STATUSES: Status[] = ["active", "dead", "unconfirmed", "fake"];
-export const SEED = seed as Provider[];
+
+function normalize(p: Partial<Provider> & { url?: string }): Provider {
+  const urls = Array.isArray(p.urls) && p.urls.length ? p.urls.filter(Boolean) : p.url ? [p.url] : [];
+  return {
+    name: p.name ?? "",
+    category: p.category ?? CATEGORIES[0]!.key,
+    badge: p.badge ?? "",
+    bonus: p.bonus ?? "",
+    notes: p.notes ?? "",
+    url: urls[0] ?? "",
+    urls,
+    status: p.status ?? "active",
+  };
+}
+
+export const SEED: Provider[] = (seed as Partial<Provider>[]).map(normalize);
 const KEY = "fai-providers-v1";
 
 export function loadProviders(): Provider[] {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) return (JSON.parse(raw) as Partial<Provider>[]).map(normalize);
   } catch {}
   return SEED;
 }
@@ -35,6 +51,14 @@ export function saveProviders(p: Provider[]) {
 }
 export function resetProviders() {
   localStorage.removeItem(KEY);
+}
+
+export function linkLabel(u: string, i: number): string {
+  try {
+    return new URL(u).hostname.replace(/^www\./, "");
+  } catch {
+    return `link ${i + 1}`;
+  }
 }
 
 // Passcode stored as SHA-256 hash in localStorage (default "admin").

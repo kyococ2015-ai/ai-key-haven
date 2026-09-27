@@ -41,7 +41,8 @@
     "badge": "Free Models",
     "bonus": "Free models available",
     "notes": "Need recharge to boost limit & use tools",
-    "url": "",
+    "url": "https://openrouter.ai/settings/",
+    "urls": ["https://openrouter.ai/settings/", "https://www.orcarouter.ai/ref/ref_75ea3ed3a9fdec069337"],
     "status": "active"
   },
   {
@@ -87,6 +88,7 @@
     "bonus": "$100 + checkin bonus",
     "notes": "Fix model to call. Backup: tabitoken.cc",
     "url": "https://tabitoken.com/sign-up?aff=WVLb",
+    "urls": ["https://tabitoken.com/sign-up?aff=WVLb", "https://tabitoken.cc/sign-up?aff=WVLb"],
     "status": "active"
   },
   {
@@ -114,6 +116,7 @@
     "bonus": "$4 + various bonus",
     "notes": "Complex but good. Backup: vsllm.cc",
     "url": "https://vsllm.com/register?aff=M0Rz",
+    "urls": ["https://vsllm.com/register?aff=M0Rz", "https://vsllm.cc/register?aff=M0Rz"],
     "status": "active"
   },
   {
@@ -275,7 +278,8 @@
     "badge": "$1-$2 Once",
     "bonus": "$1-$2 once",
     "notes": "Similar small sites",
-    "url": "",
+    "url": "https://x-llm.net/sign-up?aff=UVck",
+    "urls": ["https://x-llm.net/sign-up?aff=UVck"],
     "status": "active"
   },
   {
