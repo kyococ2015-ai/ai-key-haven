@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CATEGORIES, STATUSES, SEED, loadProviders, saveProviders, resetProviders,
-  checkPass, setPass, type Provider, type Status,
+  checkPass, setPass, linkLabel, type Provider, type Status,
 } from "@/lib/providers";
 
 export const Route = createFileRoute("/")({
@@ -46,6 +46,19 @@ function Index() {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
+  // Hidden admin shortcut: press Shift+A anywhere outside an input.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement;
+      if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT") return;
+      if (e.shiftKey && e.key.toLowerCase() === "a") {
+        setAdmin((a) => (a ? a : (setLoginOpen(true), a)));
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   const update = (next: Provider[]) => { setItems(next); saveProviders(next); };
 
   const filtered = useMemo(() => {
@@ -53,7 +66,7 @@ function Index() {
     return items
       .map((p, idx) => ({ p, idx }))
       .filter(({ p }) => cat === "all" || p.category === cat)
-      .filter(({ p }) => !s || [p.name, p.notes, p.bonus, p.badge, p.url].join(" ").toLowerCase().includes(s));
+      .filter(({ p }) => !s || [p.name, p.notes, p.bonus, p.badge, p.url, ...p.urls].join(" ").toLowerCase().includes(s));
   }, [items, q, cat]);
 
   const counts = useMemo(() => {
@@ -61,6 +74,27 @@ function Index() {
     items.forEach((p) => (c[p.category] = (c[p.category] ?? 0) + 1));
     return c;
   }, [items]);
+
+  // Default view (no search, "All" tab): group by category. Search or a tab: flat list.
+  const grouped = cat === "all" && !q.trim();
+  const groups = useMemo(() => {
+    if (!grouped) return [];
+    return CATEGORIES.map((c) => ({
+      ...c,
+      rows: filtered.filter(({ p }) => p.category === c.key),
+    })).filter((g) => g.rows.length > 0);
+  }, [filtered, grouped]);
+
+  const renderRow = (p: Provider, idx: number) => (
+    <Row
+      key={idx}
+      p={p}
+      admin={admin}
+      onEdit={() => setEditing({ idx, p: { ...p, urls: [...p.urls] } })}
+      onToggle={() => update(items.map((x, i) => (i === idx ? { ...x, status: x.status === "active" ? "dead" : "active" } : x)))}
+      onDelete={() => confirm(`Delete ${p.name}?`) && update(items.filter((_, i) => i !== idx))}
+    />
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -78,9 +112,9 @@ function Index() {
             <button className="btn" onClick={() => { const d = !dark; setDark(d); localStorage.setItem("fai-theme", d ? "dark" : "light"); }}>
               {dark ? "light" : "dark"}
             </button>
-            <button className="btn" onClick={() => (admin ? setAdmin(false) : setLoginOpen(true))}>
-              {admin ? "exit admin" : "admin"}
-            </button>
+            {admin && (
+              <button className="btn" onClick={() => setAdmin(false)}>exit admin</button>
+            )}
           </div>
         </header>
 
@@ -104,22 +138,40 @@ function Index() {
           ))}
         </nav>
 
-        {admin && <AdminBar items={items} update={update} onAdd={() => setEditing({ idx: -1, p: { name: "", category: CATEGORIES[0]!.key, badge: "", bonus: "", notes: "", url: "", status: "active" } })} />}
+        {admin && <AdminBar items={items} update={update} onAdd={() => setEditing({ idx: -1, p: { name: "", category: CATEGORIES[0]!.key, badge: "", bonus: "", notes: "", url: "", urls: [], status: "active" } })} />}
 
-        <ul className="mt-6 divide-y rounded-md border bg-card">
-          {filtered.length === 0 && <li className="p-6 text-center font-mono text-sm text-muted-foreground">no matches</li>}
-          {filtered.map(({ p, idx }) => (
-            <Row
-              key={idx}
-              p={p}
-              admin={admin}
-              onEdit={() => setEditing({ idx, p: { ...p } })}
-              onToggle={() => update(items.map((x, i) => (i === idx ? { ...x, status: x.status === "active" ? "dead" : "active" } : x)))}
-              onDelete={() => confirm(`Delete ${p.name}?`) && update(items.filter((_, i) => i !== idx))}
-            />
-          ))}
-        </ul>
-        <p className="mt-6 text-center font-mono text-xs text-muted-foreground">Bonuses change often — verify before relying on them.</p>
+        {grouped ? (
+          <div className="mt-6 space-y-6">
+            {groups.map((g) => (
+              <section key={g.key}>
+                <h2 className="mb-2 font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {g.label} <span className="opacity-60">({g.rows.length})</span>
+                </h2>
+                <ul className="divide-y rounded-md border bg-card">
+                  {g.rows.map(({ p, idx }) => renderRow(p, idx))}
+                </ul>
+              </section>
+            ))}
+            {groups.length === 0 && <p className="p-6 text-center font-mono text-sm text-muted-foreground">no matches</p>}
+          </div>
+        ) : (
+          <ul className="mt-6 divide-y rounded-md border bg-card">
+            {filtered.length === 0 && <li className="p-6 text-center font-mono text-sm text-muted-foreground">no matches</li>}
+            {filtered.map(({ p, idx }) => renderRow(p, idx))}
+          </ul>
+        )}
+
+        <p className="mt-6 text-center font-mono text-xs text-muted-foreground">
+          Bonuses change often — verify before relying on them.{" "}
+          <button
+            aria-label="admin"
+            title=""
+            onClick={() => (admin ? setAdmin(false) : setLoginOpen(true))}
+            className="cursor-default opacity-30 hover:opacity-100"
+          >
+            ·
+          </button>
+        </p>
       </div>
 
       {loginOpen && <Login onClose={() => setLoginOpen(false)} onOk={() => { setAdmin(true); setLoginOpen(false); }} />}
@@ -160,7 +212,7 @@ function Row({ p, admin, onEdit, onToggle, onDelete }: { p: Provider; admin: boo
           </p>
         )}
       </div>
-      <div className="flex shrink-0 gap-2 font-mono text-xs">
+      <div className="flex shrink-0 flex-wrap gap-2 font-mono text-xs">
         {admin && (
           <>
             <button className="btn" onClick={onToggle}>{p.status === "active" ? "mark dead" : "mark active"}</button>
@@ -168,10 +220,18 @@ function Row({ p, admin, onEdit, onToggle, onDelete }: { p: Provider; admin: boo
             <button className="btn text-destructive" onClick={onDelete}>del</button>
           </>
         )}
-        {p.url ? (
-          <a href={p.url} target="_blank" rel="noopener noreferrer" className="rounded-md bg-primary px-3 py-1.5 text-primary-foreground hover:opacity-90">
-            open ↗
-          </a>
+        {p.urls.length > 0 ? (
+          p.urls.map((u, i) => (
+            <a
+              key={u}
+              href={u}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`rounded-md px-3 py-1.5 hover:opacity-90 ${i === 0 ? "bg-primary text-primary-foreground" : "border hover:bg-accent"}`}
+            >
+              {p.urls.length === 1 ? "open ↗" : `${linkLabel(u, i)} ↗`}
+            </a>
+          ))
         ) : (
           <span className="px-3 py-1.5 text-muted-foreground">no link</span>
         )}
@@ -230,15 +290,21 @@ function Login({ onClose, onOk }: { onClose: () => void; onOk: () => void }) {
 
 function Editor({ initial, onSave, onClose }: { initial: Provider; onSave: (p: Provider) => void; onClose: () => void }) {
   const [p, setP] = useState(initial);
+  const [urlsText, setUrlsText] = useState(initial.urls.join("\n"));
   const set = (k: keyof Provider) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setP({ ...p, [k]: e.target.value });
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const urls = urlsText.split("\n").map((s) => s.trim()).filter(Boolean);
+    if (p.name.trim()) onSave({ ...p, urls, url: urls[0] ?? "", bonus: p.bonus || p.badge });
+  };
   return (
     <Modal onClose={onClose}>
-      <form className="space-y-3 font-mono text-xs" onSubmit={(e) => { e.preventDefault(); if (p.name.trim()) onSave({ ...p, bonus: p.bonus || p.badge }); }}>
+      <form className="space-y-3 font-mono text-xs" onSubmit={submit}>
         <h2 className="text-sm font-semibold">{initial.name ? "edit provider" : "new provider"}</h2>
         <label className="block">name<input required className="field" value={p.name} onChange={set("name")} /></label>
         <label className="block">credit badge<input className="field" value={p.badge} onChange={set("badge")} placeholder="$20 + Check-in" /></label>
         <label className="block">notes<textarea rows={3} className="field" value={p.notes} onChange={set("notes")} /></label>
-        <label className="block">url<input className="field" value={p.url} onChange={set("url")} /></label>
+        <label className="block">links (one per line, first = primary)<textarea rows={2} className="field" value={urlsText} onChange={(e) => setUrlsText(e.target.value)} placeholder="https://…" /></label>
         <div className="grid grid-cols-2 gap-2">
           <label className="block">category<select className="field" value={p.category} onChange={set("category")}>{CATEGORIES.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}</select></label>
           <label className="block">status<select className="field" value={p.status} onChange={set("status")}>{STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}</select></label>
