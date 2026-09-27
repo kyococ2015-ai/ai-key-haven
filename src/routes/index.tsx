@@ -46,12 +46,11 @@ function Index() {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
-  // Hidden admin shortcut: press Shift+A anywhere outside an input.
+  // Hidden admin shortcut: press Ctrl+Shift+A anywhere.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement;
-      if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT") return;
-      if (e.shiftKey && e.key.toLowerCase() === "a") {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") {
+        e.preventDefault();
         setAdmin((a) => (a ? a : (setLoginOpen(true), a)));
       }
     };
