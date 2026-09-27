@@ -104,7 +104,7 @@ function Index() {
           ))}
         </nav>
 
-        {admin && <AdminBar items={items} update={update} onAdd={() => setEditing({ idx: -1, p: { name: "", category: CATEGORIES[0].key, badge: "", bonus: "", notes: "", url: "", status: "active" } })} />}
+        {admin && <AdminBar items={items} update={update} onAdd={() => setEditing({ idx: -1, p: { name: "", category: CATEGORIES[0]!.key, badge: "", bonus: "", notes: "", url: "", status: "active" } })} />}
 
         <ul className="mt-6 divide-y rounded-md border bg-card">
           {filtered.length === 0 && <li className="p-6 text-center font-mono text-sm text-muted-foreground">no matches</li>}
