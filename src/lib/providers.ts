@@ -9,6 +9,7 @@ export type Provider = {
   notes: string;
   url: string; // primary link (kept for compatibility)
   urls: string[]; // all links, primary first
+  linkLabels: string[]; // optional short labels aligned with urls
   status: Status;
 };
 
@@ -32,6 +33,7 @@ function normalize(p: Partial<Provider> & { url?: string }): Provider {
     notes: p.notes ?? "",
     url: urls[0] ?? "",
     urls,
+    linkLabels: Array.isArray(p.linkLabels) ? p.linkLabels : [],
     status: p.status ?? "active",
   };
 }
@@ -42,7 +44,15 @@ const KEY = "fai-providers-v1";
 export function loadProviders(): Provider[] {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return (JSON.parse(raw) as Partial<Provider>[]).map(normalize);
+    if (raw) {
+      const saved = (JSON.parse(raw) as Partial<Provider>[]).map(normalize);
+      // Keep personal edits while filling links added to a newer bundled dataset.
+      return saved.map((provider) => {
+        const current = SEED.find((item) => item.name === provider.name);
+        if (!current || provider.urls.length >= current.urls.length) return provider;
+        return { ...provider, url: current.url, urls: current.urls, linkLabels: current.linkLabels };
+      });
+    }
   } catch {}
   return SEED;
 }
