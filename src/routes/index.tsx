@@ -49,7 +49,9 @@ function Index() {
     setView(localStorage.getItem("fai-view") === "grid" ? "grid" : "list");
     setAdmin(sessionStorage.getItem("fai-admin-session") === "active");
   }, []);
-  useEffect(() => document.documentElement.classList.toggle("dark", dark), [dark]);
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+  }, [dark]);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a") {
