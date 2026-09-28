@@ -43,6 +43,7 @@
     "notes": "Need recharge to boost limit & use tools",
     "url": "https://openrouter.ai/settings/",
     "urls": ["https://openrouter.ai/settings/", "https://www.orcarouter.ai/ref/ref_75ea3ed3a9fdec069337"],
+	    "linkLabels": ["OpenR", "OrcaR"],
     "status": "active"
   },
   {
@@ -89,6 +90,7 @@
     "notes": "Fix model to call. Backup: tabitoken.cc",
     "url": "https://tabitoken.com/sign-up?aff=WVLb",
     "urls": ["https://tabitoken.com/sign-up?aff=WVLb", "https://tabitoken.cc/sign-up?aff=WVLb"],
+	    "linkLabels": ["Open", "bk"],
     "status": "active"
   },
   {
@@ -117,6 +119,7 @@
     "notes": "Complex but good. Backup: vsllm.cc",
     "url": "https://vsllm.com/register?aff=M0Rz",
     "urls": ["https://vsllm.com/register?aff=M0Rz", "https://vsllm.cc/register?aff=M0Rz"],
+	    "linkLabels": ["Open", "bk"],
     "status": "active"
   },
   {
