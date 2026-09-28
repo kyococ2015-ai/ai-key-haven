@@ -278,8 +278,14 @@
     "badge": "$1-$2 Once",
     "bonus": "$1-$2 once",
     "notes": "Similar small sites",
-    "url": "https://x-llm.net/sign-up?aff=UVck",
-    "urls": ["https://x-llm.net/sign-up?aff=UVck"],
+    "url": "https://emtf.aipm9527.online/sign-up?aff=qldO",
+    "urls": [
+      "https://emtf.aipm9527.online/sign-up?aff=qldO",
+      "https://x-llm.net/sign-up?aff=UVck",
+      "https://www.wyy22.com/sign-up?aff=9DVU",
+      "https://dawcode.com/sign-up?aff=jwbq"
+    ],
+    "linkLabels": ["AIPM", "xllm", "AggAI", "DawCode"],
     "status": "active"
   },
   {
