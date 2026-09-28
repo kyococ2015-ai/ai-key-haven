@@ -47,7 +47,6 @@ function AdminAccess() {
           <label className="font-mono text-xs" htmlFor="passcode">Passcode</label>
           <input
             id="passcode"
-            autoFocus
             type="password"
             value={passcode}
             onChange={(event) => { setPasscode(event.target.value); setError(false); }}

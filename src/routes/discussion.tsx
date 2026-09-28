@@ -5,7 +5,7 @@ import { CATEGORIES } from "@/lib/providers";
 
 export const Route = createFileRoute("/discussion")({
   validateSearch: (search: Record<string, unknown>) => ({
-    topic: typeof search.topic === "string" ? search.topic : "All providers",
+    topic: typeof search["topic"] === "string" ? search["topic"] : "All providers",
   }),
   head: () => ({
     meta: [
@@ -29,7 +29,7 @@ function Discussion() {
     const script = document.createElement("script");
     script.async = true;
     script.src = "https://open-remark.zeon.studio/embed.js";
-    script.dataset.openRemarkScript = "true";
+    script.dataset["openRemarkScript"] = "true";
     document.body.appendChild(script);
   }, []);
 
