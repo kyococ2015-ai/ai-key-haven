@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep provider links as aligned `urls` and optional `linkLabels` arrays so grouped services retain concise button names across list, grid, import, and export views.
