@@ -46,7 +46,7 @@ function Index() {
   useEffect(() => {
     setItems(loadProviders());
     setDark(localStorage.getItem("fai-theme") !== "light");
-    setView(localStorage.getItem("fai-view") === "grid" ? "grid" : "list");
+    setView(localStorage.getItem("fai-view") === "list" ? "list" : "grid");
     setAdmin(sessionStorage.getItem("fai-admin-session") === "active");
   }, []);
   useEffect(() => {
@@ -105,14 +105,17 @@ function Index() {
                 Free AI API credits, routers and coding tools. {items.filter((p) => p.status === "active").length} currently active.
               </p>
             </div>
-            <button
-              className="icon-btn"
-              onClick={() => { const next = !dark; setDark(next); localStorage.setItem("fai-theme", next ? "dark" : "light"); }}
-              aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
-              title={dark ? "Light theme" : "Dark theme"}
-            >
-              {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <Link to="/discussion" search={{ topic: "All providers" }} className="icon-btn" aria-label="Discussion" title="Discussion"><MessageSquareText className="size-4" /></Link>
+              <button
+                className="icon-btn"
+                onClick={() => { const next = !dark; setDark(next); localStorage.setItem("fai-theme", next ? "dark" : "light"); }}
+                aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
+                title={dark ? "Light theme" : "Dark theme"}
+              >
+                {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              </button>
+            </div>
           </div>
         </header>
 
@@ -182,15 +185,17 @@ function ProviderItem({ p, view, admin, onEdit, onToggle, onDelete }: { p: Provi
   const [expanded, setExpanded] = useState(false);
   const long = p.notes.length > 90;
   const muted = p.status !== "active";
+  const discussionLink = <Link to="/discussion" search={{ topic: p.name }} className="icon-btn" aria-label={`Discuss or report ${p.name}`} title="Discuss or report"><MessageSquareText className="size-4" /></Link>;
   const content = (
     <>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className={`font-medium ${muted ? "text-muted-foreground" : ""}`}>{p.name}</h3>
-          {p.badge && <span className="rounded bg-primary/10 px-1.5 py-0.5 font-mono text-xs text-primary">{p.badge}</span>}
+          {p.badge && <span className="rounded bg-primary/10 px-1.5 py-0.5 font-mono text-xs text-primary" title={p.bonus}>{p.badge}</span>}
           <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] uppercase ${STATUS_STYLE[p.status]}`}>● {STATUS_LABEL[p.status]}</span>
         </div>
         {p.notes && <p className="mt-2 text-sm leading-6 text-muted-foreground">{long && !expanded ? `${p.notes.slice(0, 90).trimEnd()}…` : p.notes}{long && <button onClick={() => setExpanded(!expanded)} className="ml-1 font-mono text-xs text-primary hover:underline">{expanded ? "Show less" : "See more"}</button>}</p>}
+        {view === "list" && discussionLink}
       </div>
       <div className={`flex shrink-0 flex-wrap gap-2 ${view === "grid" ? "mt-5" : "sm:justify-end"}`}>
         {admin && <><button className="btn" onClick={onToggle}>{p.status === "active" ? "mark dead" : "mark active"}</button><button className="btn" onClick={onEdit}>edit</button><button className="btn text-destructive" onClick={onDelete}>del</button></>}
@@ -199,7 +204,7 @@ function ProviderItem({ p, view, admin, onEdit, onToggle, onDelete }: { p: Provi
             {p.linkLabels[index] || (p.urls.length === 1 ? "Open" : linkLabel(url, index))}<ExternalLink className="size-3" />
           </a>
         )) : <span className="px-3 py-1.5 font-mono text-xs text-muted-foreground">No link</span>}
-        <Link to="/discussion" search={{ topic: p.name }} className="icon-btn" aria-label={`Discuss or report ${p.name}`} title="Discuss or report"><MessageSquareText className="size-4" /></Link>
+        {view === "grid" && discussionLink}
       </div>
     </>
   );
